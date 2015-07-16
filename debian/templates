@@ -1,0 +1,11 @@
+Template: hsn2/broker
+Type: string
+Default: localhost
+Description: Broker hostname or ip
+ Part of HSN2 common service configuration.
+
+Template: hsn2/datastore
+Type: string
+Default: localhost:8080
+Description: Datastore hostname or ip and port
+ Part of HSN2 common service configuration.

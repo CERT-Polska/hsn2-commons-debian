@@ -1,0 +1,12 @@
+#!/bin/sh -e
+
+. /lib/hsn2/conf-functions
+
+if [ "$1" = "configure" ]; then
+	CONFFILE="/etc/hsn2/common.conf"
+	
+	setConfigValueFromDb BROKER_ADDRESS hsn2/broker $CONFFILE
+	setConfigValueFromDb DATASTORE_ADDRESS hsn2/datastore $CONFFILE
+fi
+
+#DEBHELPER#

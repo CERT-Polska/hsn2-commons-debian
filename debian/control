@@ -1,0 +1,12 @@
+Source: hsn2-commons-debian
+Section: misc
+Priority: optional
+Maintainer: CERT Polska <info@cert.pl>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+
+Package: hsn2-commons-debian
+Architecture: all
+Depends: ${misc:Depends}
+Description: HSN2 Debian Service Commons Library.
+	Provides a common configuration helper script.
