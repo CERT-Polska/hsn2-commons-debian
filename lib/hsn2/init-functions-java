@@ -1,0 +1,122 @@
+#!/bin/sh
+# /lib/hsn2/init-functions-java for Debian -*- shell-script -*-
+
+
+JSVCBIN=`which jsvc`
+
+. /lib/lsb/init-functions
+
+# Include the wrappers utility script
+. /usr/lib/java-wrappers/java-wrappers.sh
+
+# We need openjdk runtime.
+require_java_runtime openjdk
+
+prepare() {
+	if [ -z $HSN2_COMPONENT_HOME ]; then
+		HSN2_COMPONENT_HOME="/opt/hsn2/$HSN2_COMPONENT"
+	fi
+	
+	if [ -z $PIDFILE ]; then
+		PIDFILE="/var/run/hsn2-$HSN2_COMPONENT.pid"
+	fi
+	
+	HSN2_CLASSPATH=$HSN2_COMPONENT_HOME/lib:$HSN2_COMPONENT_HOME/hsn2-$HSN2_COMPONENT.jar
+	HSN2_JVM_PARAMS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1104"
+}
+
+load_config() {
+	if [ -f $CONFFILE ]; then
+		. $CONFFILE
+	else
+		echo "Missing configuration file: $CONFFILE"
+		exit 1
+	fi
+}
+
+prepare_start() {
+	return
+}
+
+service_start_java() {
+	# usage: start_service "$EXEC" "$PROCNAME"
+	
+	load_config
+	prepare_start
+	
+	log_daemon_msg "Starting" "$NAME"
+	if [ service_status_java = "0" ]; then
+		log_end_msg 0
+		echo "$NAME is already running"
+	else
+		if [ "$DONT_START" = "1" ]; then
+			echo "Skipping start because of DONT_START=1 in $CONFFILE. Remember to start the service";
+			exit 0
+		fi
+		
+		$JSVCBIN -home $JAVA_HOME -wait 30 -pidfile ${PIDFILE} $HSN2_JVM_PARAMS -cp $JAVA_CLASSPATH:$HSN2_CLASSPATH $MAINCLASS $HSN2_COMPONENT_PARAMS
+		log_end_msg $?
+	fi
+}
+
+service_stop_java() {
+	# usage: stop_service "$NAME" "$HSN2_SERVICE"
+	log_daemon_msg "Stopping" "$NAME"
+	
+	if [ service_status_java = "0" ]; then
+		$JSVCBIN -home $JAVA_HOME -stop -pidfile ${PIDFILE} $HSN2_JVM_PARAMS -cp $JAVA_CLASSPATH:$HSN2_CLASSPATH $MAINCLASS
+		log_end_msg $?
+		return $?
+	else
+		log_end_msg 0
+		echo "$NAME is already stopped"
+		return 0
+	fi
+}
+
+service_reload_java() {
+	echo "reloading not implemented"
+}
+
+service_restart_java() {
+	service_stop_java
+	service_start_java
+}
+
+service_status_java() {
+	status_of_proc -p $PIDFILE "$JSVCBIN" "$NAME" && return 0 || return $?
+}
+
+choose_java_service_action() {
+	# usage: choose_java_service_action "$1"
+	
+	prepare
+	
+	case "$1" in
+		start)
+			service_start_java
+			;;
+	
+		stop)
+			service_stop_java
+			;;
+	
+		reload)
+			service_reload_java
+			;;
+	
+		restart)
+			service_restart_java
+			;;
+	
+		status)
+			service_status_java
+			;;
+	
+		*)
+			echo "Usage: $0 {start|stop|restart|status}" >&2
+			exit 3
+			;;
+	esac
+}
+
