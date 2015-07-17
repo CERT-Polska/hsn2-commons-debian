@@ -1,0 +1,134 @@
+#!/bin/sh
+# /lib/hsn2/init-functions-python for Debian -*- shell-script -*-
+
+. /lib/lsb/init-functions
+
+if [ -z "`which python`" ]; then
+	echo "PYTHON needs to be installed first!"
+	exit 1
+fi
+
+PYTHON="/usr/bin/python"
+
+prepare() {
+	if [ -z $HSN2_COMPONENT_HOME ]; then
+		HSN2_COMPONENT_HOME="/usr/lib/python2.7/dist-packages/$HSN2_COMPONENT"
+	fi
+	
+	if [ -z $PIDFILE ]; then
+		PIDFILE="/var/run/hsn2-$HSN2_COMPONENT.pid"
+	fi
+}
+
+load_config() {
+	if [ -f $CONFFILE ]; then
+		. $CONFFILE
+	else
+		echo "Missing configuration file: $CONFFILE"
+		exit 1
+	fi
+}
+
+prepare_start() {
+	return
+}
+
+service_start_python() {
+	# usage: start_service "$EXEC" "$PROCNAME"
+	
+	load_config
+	prepare_start
+	
+	log_daemon_msg "Starting" "$NAME"
+	service_status_quiet_python
+	if [ $? -eq 0 ]; then
+		log_end_msg 0
+		echo "$NAME is already running"
+		return 0
+	else
+		if [ "$DONT_START" = "1" ]; then
+			echo "Skipping start because of DONT_START=1 in $CONFFILE. Remember to start the service";
+			return 0
+		fi
+		
+		cd "$HSN2_COMPONENT_HOME"
+		# workaround (see redmine #6587, #6324)
+		start-stop-daemon --start --quiet --oknodo --background --make-pidfile --pidfile $PIDFILE --exec /usr/bin/python -- ${HSN2_COMPONENT_HOME}/${HSN2_MAIN_MODULE} ${HSN2_COMPONENT_PARAMS}
+		log_end_msg $?
+		return $?
+	fi
+}
+
+service_stop_python() {
+	# usage: stop_service "$NAME" "$HSN2_SERVICE"
+	log_daemon_msg "Stopping" "$NAME"
+	service_status_quiet_python
+	if [ $? -eq 0 ]; then
+		if start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE --retry 10; then
+			log_end_msg 0
+			echo "" > $PIDFILE
+		else
+			log_end_msg 1
+		fi
+		return $?
+	else
+		log_end_msg 0
+		echo "$NAME is already stopped"
+		return 0
+	fi
+}
+
+service_reload_python() {
+	echo "reloading not implemented"
+}
+
+service_restart_python() {
+	service_stop_python
+	service_start_python
+}
+
+service_status_quiet_python() {
+	status=0
+	pidofproc -p $PIDFILE $PYTHON >/dev/null || status=$?
+	return $status
+}
+
+service_status_python() {
+	status_of_proc -p $PIDFILE "$PYTHON" "$NAME" && exit 0 || exit $?
+}
+
+choose_python_service_action() {
+	# usage: choose_python_service_action "$1"
+	
+	prepare
+	
+	case "$1" in
+		start)
+			service_start_python
+			;;
+	
+		stop)
+			service_stop_python
+			;;
+	
+		reload)
+			service_reload_python
+			;;
+	
+		restart)
+			service_restart_python
+			;;
+	
+		status)
+			service_status_python
+			;;
+	
+		*)
+			echo "Usage: $0 {start|stop|restart|status}" >&2
+			exit 3
+			;;
+	esac
+	
+	exit $?
+}
+
