@@ -65,7 +65,7 @@ service_start_java() {
 			return 0
 		fi
 		
-		$JSVCBIN -home $JAVA_HOME -wait 30 -pidfile ${PIDFILE} $HSN2_JVM_PARAMS -cp $JAVA_CLASSPATH:$HSN2_CLASSPATH $MAINCLASS $HSN2_COMPONENT_PARAMS
+		$JSVCBIN -home $JAVA_HOME -wait 30 -pidfile $PIDFILE $HSN2_JVM_PARAMS -cp $JAVA_CLASSPATH:$HSN2_CLASSPATH $MAINCLASS $HSN2_COMPONENT_PARAMS
 		log_end_msg $?
 		return $?
 	fi
@@ -136,5 +136,7 @@ choose_java_service_action() {
 			exit 3
 			;;
 	esac
+	
+	exit $?
 }
 
