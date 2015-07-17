@@ -54,25 +54,28 @@ service_start_java() {
 	prepare_start
 	
 	log_daemon_msg "Starting" "$NAME"
-	if [ service_status_java = "0" ]; then
+	service_status_quiet_java
+	if [ $? -eq 0 ]; then
 		log_end_msg 0
 		echo "$NAME is already running"
+		return 0
 	else
 		if [ "$DONT_START" = "1" ]; then
 			echo "Skipping start because of DONT_START=1 in $CONFFILE. Remember to start the service";
-			exit 0
+			return 0
 		fi
 		
 		$JSVCBIN -home $JAVA_HOME -wait 30 -pidfile ${PIDFILE} $HSN2_JVM_PARAMS -cp $JAVA_CLASSPATH:$HSN2_CLASSPATH $MAINCLASS $HSN2_COMPONENT_PARAMS
 		log_end_msg $?
+		return $?
 	fi
 }
 
 service_stop_java() {
 	# usage: stop_service "$NAME" "$HSN2_SERVICE"
 	log_daemon_msg "Stopping" "$NAME"
-	
-	if [ service_status_java = "0" ]; then
+	service_status_quiet_java
+	if [ $? -eq 0 ]; then
 		$JSVCBIN -home $JAVA_HOME -stop -pidfile ${PIDFILE} $HSN2_JVM_PARAMS -cp $JAVA_CLASSPATH:$HSN2_CLASSPATH $MAINCLASS
 		log_end_msg $?
 		return $?
@@ -90,6 +93,12 @@ service_reload_java() {
 service_restart_java() {
 	service_stop_java
 	service_start_java
+}
+
+service_status_quiet_java() {
+	status=0
+	pidofproc -p $PIDFILE $JSVCBIN >/dev/null || status=$?
+	return $status
 }
 
 service_status_java() {
