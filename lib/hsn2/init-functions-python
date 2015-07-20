@@ -71,7 +71,9 @@ service_stop_python() {
 	if [ $? -eq 0 ]; then
 		if start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE --retry 10; then
 			log_end_msg 0
-			echo "" > $PIDFILE
+			if [ -f $PIDFILE ]; then
+				echo "" > $PIDFILE
+			fi
 		else
 			log_end_msg 1
 		fi
