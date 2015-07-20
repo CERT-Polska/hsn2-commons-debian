@@ -14,9 +14,14 @@ prepare() {
 	if [ -z $HSN2_COMPONENT_HOME ]; then
 		HSN2_COMPONENT_HOME="/usr/lib/python2.7/dist-packages/$HSN2_COMPONENT"
 	fi
-	
+
 	if [ -z $PIDFILE ]; then
 		PIDFILE="/var/run/hsn2-$HSN2_COMPONENT.pid"
+	fi
+	if [ -n $NOMAKEPID ]; then
+		MAKEPIDFLAG=""
+	else
+		MAKEPIDFLAG="--make-pidfile"
 	fi
 }
 
@@ -53,7 +58,7 @@ service_start_python() {
 		
 		cd "$HSN2_COMPONENT_HOME"
 		# workaround (see redmine #6587, #6324)
-		start-stop-daemon --start --quiet --oknodo --background --make-pidfile --pidfile $PIDFILE --exec /usr/bin/python -- ${HSN2_COMPONENT_HOME}/${HSN2_MAIN_MODULE} ${HSN2_COMPONENT_PARAMS}
+		start-stop-daemon --start --quiet --oknodo --background $MAKEPIDFLAG --pidfile $PIDFILE --exec /usr/bin/python -- ${HSN2_COMPONENT_HOME}/${HSN2_MAIN_MODULE} ${HSN2_COMPONENT_PARAMS}
 		log_end_msg $?
 		return $?
 	fi
