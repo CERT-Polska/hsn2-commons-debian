@@ -27,10 +27,10 @@ prepare() {
 	
 	if [ -z $HSN2_JVM_PARAMS ]; then
 		if [ ! -z $HSN2_JMX_PORT ]; then
-			HSN2_JMX_PORT_FULL="-Dcom.sun.management.jmxremote.port=$HSN2_JMX_PORT"
+			HSN2_JMX_PARAMS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=$HSN2_JMX_PORT"
 		fi
 	
-		HSN2_JVM_PARAMS="$HSN2_JVM_PARAMS_MEMORY -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false $HSN2_JMX_PORT_FULL"
+		HSN2_JVM_PARAMS="$HSN2_JVM_PARAMS_MEMORY $HSN2_JMX_PARAMS"
 	fi
 }
 
