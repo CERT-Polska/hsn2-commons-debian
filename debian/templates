@@ -9,3 +9,10 @@ Type: string
 Default: localhost:8080
 Description: Datastore hostname or ip and port
  Part of HSN2 common service configuration.
+
+Template: hsn2/maxthreads
+Type: string
+Default: 5
+Description: Maximum number of threads
+ The maximum number of threads to start per service.
+ Part of HSN2 common service configuration.
