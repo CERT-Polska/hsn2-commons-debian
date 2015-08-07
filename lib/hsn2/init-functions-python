@@ -18,10 +18,11 @@ prepare() {
 	if [ -z $PIDFILE ]; then
 		PIDFILE="/var/run/hsn2-$HSN2_COMPONENT.pid"
 	fi
-	if [ -n $NOMAKEPID ]; then
-		MAKEPIDFLAG=""
-	else
+	
+	if [ -z $NOMAKEPID ]; then
 		MAKEPIDFLAG="--make-pidfile"
+	else
+		MAKEPIDFLAG=""
 	fi
 }
 
