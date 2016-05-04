@@ -7,3 +7,5 @@ db_input high hsn2/broker || true
 db_go
 db_input high hsn2/datastore || true
 db_go
+db_input high hsn2/maxthreads || true
+db_go

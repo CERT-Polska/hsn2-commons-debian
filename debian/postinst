@@ -7,6 +7,7 @@ if [ "$1" = "configure" ]; then
 	
 	setConfigValueFromDb BROKER_ADDRESS hsn2/broker $CONFFILE
 	setConfigValueFromDb DATASTORE_ADDRESS hsn2/datastore $CONFFILE
+	setConfigValueFromDb MAX_THREADS hsn2/maxthreads $CONFFILE
 fi
 
 #DEBHELPER#

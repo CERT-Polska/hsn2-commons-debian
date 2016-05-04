@@ -1,0 +1,5 @@
+debian/files
+debian/hsn2-commons-debian.debhelper.log
+debian/hsn2-commons-debian.postrm.debhelper
+debian/hsn2-commons-debian.substvars
+debian/hsn2-commons-debian/
